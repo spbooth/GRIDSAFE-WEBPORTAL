@@ -1,0 +1,8 @@
+    This is the GridSAFE accounting portal
+
+Its a small web application built using WEBAPP-JAR and ACCOUNTING-JAR
+projects to build a stand alone accounting/reporting portal.
+This project assumes an external form of authentication configured in either 
+apache or tomcat.
+
+Developed as part of the GridSAFE project
