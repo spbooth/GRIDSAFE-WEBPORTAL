@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<!-- Copyright - The University of Edinburgh 2015 -->
+<rep:Report 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:rep="http://safe.epcc.ed.ac.uk/report"
+  xmlns:par="http://safe.epcc.ed.ac.uk/parameter"
+  xmlns:per="http://safe.epcc.ed.ac.uk/period"
+  xmlns:fil="http://safe.epcc.ed.ac.uk/filter"
+  xmlns:tab="http://safe.epcc.ed.ac.uk/table"
+  xmlns:cha="http://safe.epcc.ed.ac.uk/chart"
+  xmlns:fmt="http://safe.epcc.ed.ac.uk/format"
+  xmlns:ato="http://safe.epcc.ed.ac.uk/atom">
+<par:ParameterDef label="Start Date" name="StartDate" type="Date" value="Now-1m"/>
+<par:ParameterDef label="End Date" name="EndDate" type="Date" value="Now-0m"/>   
+<par:ParameterDef label="Skip records" name="Skip" type="Integer" value="0"/>
+<par:ParameterDef label="Number of records" name="Count" type="integer" value="100"/> 	 	
+<per:Period>
+<per:StartTime><par:Parameter name="StartDate"/></per:StartTime>
+<per:EndTime><par:Parameter name="EndDate"/></per:EndTime>
+</per:Period>	
+<fil:Filter>
+<fil:NotNull>
+  <fil:Property>table:Globus</fil:Property>
+</fil:NotNull>
+</fil:Filter>	
+<fmt:Format>
+<fmt:Limit>
+<fmt:Start><par:Parameter name="Skip"/></fmt:Start>
+<fmt:Count><par:Parameter name="Count"/></fmt:Count>
+</fmt:Limit>
+<JobUsageRecord xmlns="http://www.gridforum.org/2003/ur-wg" xmlns:urwg="http://www.gridforum.org/2003/ur-wg" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+<RecordIdentity urwg:recordId="${batch:SubmittedTimestamp}:${ogfur:LocalJobId}@${ogfur:MachineName}" urwg:createTime="${createTime}"></RecordIdentity>
+<fmt:IfDef required="ogfur:LocalJobId"><JobIdentity><LocalJobId>${ogfur:LocalJobId}</LocalJobId></JobIdentity></fmt:IfDef>
+<fmt:IfDef required="ogfur:LocalUserId"><UserIdentity>
+    <LocalUserId>${ogfur:LocalUserId}</LocalUserId>
+    <fmt:IfDef required="ogfur:X509SubjectName"><ds:KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#" xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+    <X509Data>
+      <X509SubjectName>${ogfur:X509SubjectName}</X509SubjectName>
+    </X509Data>
+    </ds:KeyInfo></fmt:IfDef>
+</UserIdentity></fmt:IfDef>
+<fmt:IfDef required="JobName"><JobName>${JobName}</JobName></fmt:IfDef>
+<fmt:IfDef required="batch:Success"><fmt:If property="batch:Success" value="true"><Status>completed</Status></fmt:If><fmt:If property="batch:Success" value="false"><Status>failed</Status></fmt:If></fmt:IfDef>
+<fmt:IfNDef required="batch:Success"><Status>completed</Status></fmt:IfNDef>
+<fmt:IfDef required="ngs:KBUsed"><Memory urwg:type="memoryUsed" urwg:storageUnit="KB">$[integer]{ngs:KBUsed}</Memory></fmt:IfDef>
+<fmt:IfDef required="ngs:VirtualKBUsed"><Memory urwg:type="virtualMemoryUsed" urwg:storageUnit="KB">$[integer]{ngs:VirtualKBUsed}</Memory></fmt:IfDef>
+<fmt:IfDef required="ngs:GlobusSubmittedTime"><TimeInstant urwg:type="timeGlobusSubmitted">${ngs:GlobusSubmittedTime}</TimeInstant></fmt:IfDef>
+<fmt:IfDef required="ngs:GlobusExecutableTime"><TimeInstant urwg:type="timeGlobusExecutable">${ngs:GlobusExecutableTime}</TimeInstant></fmt:IfDef>
+<fmt:IfDef required="ngs:GlobusFinishedTime"><TimeInstant urwg:type="timeGlobusFinished">${ngs:GlobusFinishedTime}</TimeInstant></fmt:IfDef>
+<fmt:IfDef required="batch:SubmittedTimestamp"><TimeInstant urwg:type="BatchSubmittedTimestamp">${batch:SubmittedTimestamp}</TimeInstant></fmt:IfDef>
+<fmt:IfDef required="ogfur:WallDuration"><WallDuration>${ogfur:WallDuration}</WallDuration></fmt:IfDef>
+<fmt:IfDef required="ogfur:CpuDuration"><CpuDuration>${ogfur:CpuDuration}</CpuDuration></fmt:IfDef>
+<fmt:IfDef required="ogfur:NodeCount"><NodeCount>${ogfur:NodeCount}</NodeCount></fmt:IfDef>
+<fmt:IfDef required="ogfur:Processors"><Processors>${ogfur:Processors}</Processors></fmt:IfDef>
+<fmt:IfDef required="ogfur:EndTime"><EndTime>${ogfur:EndTime}</EndTime></fmt:IfDef>
+<fmt:IfDef required="ogfur:StartTime"><StartTime>${ogfur:StartTime}</StartTime></fmt:IfDef>
+<fmt:IfDef required="ogfur:MachineName"><MachineName>${ogfur:MachineName}</MachineName></fmt:IfDef>
+<fmt:IfDef required="SubmitHost"><SubmitHost>${SubmitHost}</SubmitHost></fmt:IfDef>
+<fmt:IfDef required="ogfur:Queue"><Queue>${ogfur:Queue}</Queue></fmt:IfDef>
+<fmt:IfDef required="ngs:Vo"><Resource urwg:description="VOinfo">${ngs:Vo}</Resource></fmt:IfDef>
+</JobUsageRecord>
+ </fmt:Format>
+ </rep:Report>

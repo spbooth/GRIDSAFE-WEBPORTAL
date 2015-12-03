@@ -1,0 +1,8 @@
+This directory contains a sets of replacement files that are
+included in the war file as part of the build
+* Define service.id=X to include files from the directory X
+* Define service.flavour=flavour-Y to further customise using X/flavour-Y
+
+Though most configuration can be changed from the database or the 
+tomcat context configuration there is no way of overriding some elements of the 
+web.xml file. 

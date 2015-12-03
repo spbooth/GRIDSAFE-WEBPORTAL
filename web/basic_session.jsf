@@ -1,0 +1,9 @@
+<%-- Copyright - The University of Edinburgh 2015 --%>
+<%--
+ Perform basic service and connection initialization
+--%>
+<%@ include file="/service_init.jsf" %>
+<%--
+ check the current session is valid and define the person object
+--%>
+<%@ include file="/scripts/basic_session.jsf" %>

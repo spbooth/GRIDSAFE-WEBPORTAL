@@ -1,0 +1,5 @@
+<%-- Copyright - The University of Edinburgh 2015 --%>
+<%--
+ Do password change if required
+--%>
+<%@ include file="/basic_session.jsf" %>

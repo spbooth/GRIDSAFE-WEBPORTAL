@@ -1,0 +1,11 @@
+<%-- Copyright - The University of Edinburgh 2015 --%>
+<div class="bar">
+	<h3>Logged in as <%=session_service.getName()%></h3>
+	<form method="POST" action="<%=response.encodeURL( web_path+"/personal_update.jsp")%>"><input
+		class="input_button" type="submit" value=" Update Personal details" />
+	</form>
+	 <form method="post" action="<%= response.encodeURL(request.getContextPath()+"/LoginServlet") %>">
+   <input
+      class="input_button" name="logout" type="submit" value="  Logout  ">
+  </form>
+</div>

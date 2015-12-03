@@ -1,0 +1,322 @@
+<!-- Copyright - The University of Edinburgh 2015 -->
+<project name="WEBACCT accounting portal" default="build-war" basedir=".">
+
+	<!-- ==== Property Definitions ==== -->
+	<property environment="env" />
+
+	<property file="build.properties" />
+	<property file="${user.home}/build.properties" />
+	<property name="tomcat.home" value="${env.CATALINA_HOME}" />
+	<property name="deploy.base" value="${env.CATALINA_BASE}" />
+	<property name="catalina.ant" value="${tomcat.home}/lib/catalina-ant.jar" />
+
+	<!-- ==== File and Directory Names ==== -->
+
+	<property name="app.name" value="webacct" />
+	<property name="app.version" value="$Tag$" />
+	<property name="build.home" value="${basedir}/build" />
+	<property name="work.home" value="${basedir}/work" />
+	<property name="test.home" value="${basedir}/WEB-INF/tests" />
+	
+	<property name="webapp.jar" value="${basedir}/WEB-INF/lib/safe/webapp.jar" />
+	<property name="accounting.jar" value="${basedir}/WEB-INF/lib/safe/accounting.jar" />
+    <property name="webapp-test.jar" value="${basedir}/WEB-INF/tests/lib/webapp-test.jar" />
+	<property name="java-diff.jar" value="${basedir}/WEB-INF/tests/lib/java-diff.1.0.5.jar" />
+    
+    
+    <property name="one-jar.dist.dir" value="${basedir}/extra"/>   
+	
+	<!-- Change these values in a build.properties file -->
+
+	<property name="url" value="http://localhost:9091/manager" />
+	<property name="path" value="/${app.name}" />
+	<property name="username" value="admin" />
+	<property name="password" value="xxxx" />
+
+
+	<import file="${tomcat.home}/bin/catalina-tasks.xml"/>
+
+	<property name="compile.debug" value="true" />
+	<property name="compile.deprecation" value="false" />
+	<property name="compile.optimize" value="true" />
+	<property name="compile.target" value="1.5" />
+	<property name="compile.source" value="1.5" />
+    <property name="ant.headless" value="true" />
+	<!-- ==== All Target ==== -->
+
+	<target name="all" depends="clean, compile-jsps" description="Clean build and dist, then compile." />
+
+	<!-- ==== Clean Target ==== -->
+
+	<target name="clean" description="Delete old build directories.">
+		<delete dir="${build.home}" />
+		<delete dir="${work.home}" />
+		<delete dir="${test.build}" />
+		<delete dir="${report.dir}" />
+	</target>
+
+
+	<!-- ==== Compilation Target ==== -->
+
+	<path id="compile.classpath">
+		<fileset dir="${build.home}/WEB-INF/lib">
+			<include name="*.jar" />
+		</fileset>
+		<pathelement location="${build.home}/WEB-INF/classes" />
+		<fileset dir="${tomcat.home}/lib">
+			<include name="*.jar" />
+			
+		</fileset>
+	</path>
+    <path id="test.classpath">
+		<fileset dir="${build.home}/WEB-INF/lib">
+			<include name="*.jar" />
+		</fileset>
+		<pathelement location="${build.home}/WEB-INF/classes" />
+		<fileset dir="${tomcat.home}/lib">
+			<include name="*.jar" />
+
+		</fileset>
+		<pathelement location="${webapp-test.jar}"/>
+		<pathelement location="${java-diff.jar}"/>
+		<pathelement location="${junit.jar}"/>
+		<pathelement location="${test.build}" />
+		<!-- to find the test.properties -->
+		<pathelement location="${test.home}" />
+
+
+	</path>
+	<target name="compile-java" depends="basic" description="Compile Java sources">
+
+		<!-- Compile and/or retrieve all Java classes and place in appropriate directories. -->
+
+		<!-- make dirs, only need to specify bottom dirs -->
+
+		<javac srcdir="${basedir}/WEB-INF/classes"
+		destdir="${build.home}/WEB-INF/classes"
+		debug="${compile.debug}"
+		deprecation="${compile.deprecation}"
+		optimize="${compile.optimize}"
+                source="${compile.source}"
+                target="${compile.target}">
+			<classpath refid="compile.classpath" />
+		</javac>
+
+	</target>
+
+	<target name="compile-jsps" depends="compile-java, prepare" description="Compile JSP JAva sources">
+
+		<!-- verify jsps compile, just a test we don't deploy these class files -->
+		<javac srcdir="${work.home}" debug="${compile.debug}"
+source="${compile.source}" target="${compile.target}"
+deprecation="${compile.deprecation}" optimize="${compile.optimize}">
+			<classpath refid="compile.classpath" />
+		</javac>
+		
+	</target>
+		
+	<target name="compile-jsps-development" depends="compile-java, prepare" description="Compile JSP JAva sources">
+
+		<antcall target="compile-jsps" >
+			<param name="service.id" value="development" />
+			<param name="service.flavour" value="${flavour.local}" />
+		</antcall>
+		
+	</target>
+
+	<!-- Three-stage service choice implementation -->
+
+	<!-- 1. This bit chooses the default values common to all services. -->
+
+	<target name="basic">
+
+		<mkdir dir="${build.home}" />
+		<copy todir="${build.home}">
+			<fileset dir="${basedir}/web" includes="**/*.*" />
+		</copy>
+
+		<mkdir dir="${build.home}/css" />
+		<copy todir="${build.home}/css">
+			<fileset dir="${basedir}/web/css" includes="**/*.*" />
+		</copy>
+
+		<mkdir dir="${build.home}/WEB-INF" />
+		<copy todir="${build.home}/WEB-INF">
+			<fileset dir="${basedir}/WEB-INF" includes="*.xml" />
+		</copy>
+
+		<mkdir dir="${build.home}/WEB-INF/classes" />
+		<copy todir="${build.home}/WEB-INF/classes">
+			<fileset dir="${basedir}/WEB-INF/classes">
+				<include name="**/*.lcf"/>
+				<include name="**/*.properties"/>
+			</fileset>
+		</copy>
+
+		<mkdir dir="${build.home}/WEB-INF/email-templates" />
+		<copy todir="${build.home}/WEB-INF/email-templates">
+			<fileset dir="${basedir}/WEB-INF/email-templates" includes="*.txt " />
+		</copy>
+
+		<mkdir dir="${build.home}/WEB-INF/lib" />
+		<copy todir="${build.home}/WEB-INF/lib">
+			<fileset dir="${basedir}/WEB-INF/lib" >
+                        <include name="*.jar"/>
+			            <exclude name="mysql*.jar"/>
+            </fileset>
+		</copy>
+		<copy file="${webapp.jar}" todir="${build.home}/WEB-INF/lib/"/>
+		<copy file="${accounting.jar}" todir="${build.home}/WEB-INF/lib/"/>
+				
+		<mkdir dir="${build.home}/WEB-INF/report-templates" />
+		<copy todir="${build.home}/WEB-INF/report-templates">
+			<fileset dir="${basedir}/WEB-INF/report-templates" includes="*.xml " />
+		</copy>
+
+		<mkdir dir="${build.home}/WEB-INF/schema" />
+		<copy todir="${build.home}/WEB-INF/schema">
+			<fileset dir="${basedir}/WEB-INF/schema" includes="*.xsd " />
+		</copy>
+
+		<mkdir dir="${build.home}/WEB-INF/stylesheets" />
+		<copy todir="${build.home}/WEB-INF/stylesheets">
+			<fileset dir="${basedir}/WEB-INF/stylesheets" includes="*.xsl " />
+		</copy>
+
+	</target>
+
+	<!-- 2. This bit chooses the overall service def we want to use. -->
+
+	<available type="dir" file="${basedir}/services/${service.id}" property="copy-service" />
+	<target name="service" depends="basic" if="copy-service">
+		<copy todir="${build.home}/" verbose="true" overwrite="true">
+			<fileset dir="${basedir}/services/${service.id}">
+				<include name="**/*" />
+				<!-- excluding all the flavours -->
+				<exclude name="flavour-*"/>
+				<exclude name="flavour-*/**/*"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<!-- 3. This bit chooses the flavour of service definition. -->
+
+	<available type="dir" file="${basedir}/services/${service.id}/${service.flavour}" property="copy-flavour" />
+	<target name="service-flavour" depends="service" if="copy-flavour">
+		<copy todir="${build.home}/" verbose="true" overwrite="true">
+			<fileset dir="${basedir}/services/${service.id}/${service.flavour}">
+				<include name="**/*" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="prepare" depends="service-flavour">
+
+		<!-- This compiles the JSPs as a test before deployment. -->
+		<!-- Requires the service header and footer to be in place (done by previous block) -->
+		<mkdir dir="${work.home}/WEB-INF/classes" />
+
+		<taskdef classname="org.apache.jasper.JspC" name="jasper2" >
+			<classpath id="jspc.classpath">
+				<pathelement location="${java.home}/../lib/tools.jar"/>
+				<fileset dir="${tomcat.home}/bin">
+					<include name="*.jar"/>
+				</fileset>
+				<fileset dir="${tomcat.home}/lib">
+					<include name="*.jar"/>
+				</fileset>
+			</classpath>
+		</taskdef>
+
+		<jasper2 
+             validateXml="false" 
+             uriroot="${build.home}" 
+             webXmlFragment="${work.home}/WEB-INF/generated_web.xml" 
+             outputDir="${work.home}/WEB-INF/classes" />
+
+	</target>
+	
+	<import file="${one-jar.dist.dir}/one-jar-ant-task.xml"
+	optional="true"/>   
+    <target name="app-jar" depends="compile-java, prepare" description="Build executable jar for upload app">
+    	
+    	<delete file="gridsafe-apps.jar"/>
+    	<manifest file="apps.mf">
+    	       <attribute name="Main-Class" value="com.simontuffs.onejar.Boot"/>
+    		<attribute name="One-Jar-Main-Class" value="uk.ac.ed.epcc.webapp.apps.CommandLauncher"/>
+    	</manifest>
+    	<one-jar destfile="gridsafe-apps.jar" manifest="apps.mf">
+    	            <main>
+    	                <!-- Construct main.jar from classes and source code -->
+    	                <fileset dir="${build.home}/WEB-INF/classes"/>
+			<fileset dir="${build.home}">
+        	    <include name="WEB-INF/report-templates/*.xml"/>
+        	    <include name="WEB-INF/schema/*.xsd"/>
+        	    <include name="WEB-INF/stylesheets/*.xsl"/>
+        	 </fileset>
+
+    	            </main>
+    	            <lib>
+    	            	<fileset dir="${build.home}/WEB-INF/lib">
+    	            	    		<include name="*.jar"/>
+ 									<exclude name="xml-apis.jar"/>
+    	                </fileset>
+                        <fileset dir="${basedir}/extra">
+                                <include name="*mysql*.jar"/>
+                        </fileset>
+    	            	<fileset dir="${basedir}/WEB-INF/lib">
+                                 <include name="*mysql*.jar"/>
+    	            	</fileset>
+    	            </lib>
+    		        <fileset dir="${basedir}/licenses" >
+    		        	        <include name="*.license"/>
+    		        </fileset>
+    	        </one-jar>
+    </target>
+    
+	<!-- ==== Copies the built project into a local Tomcat ==== -->
+
+	<target name="deploy-local" depends="compile-jsps" description="Installs a copy of the web app in a local Tomcat instance">
+		<!-- Clean destination first! -->
+		<copy todir="${deploy.base}/webapps/${path}">
+			<fileset dir="${build.home}" />
+		</copy>
+	</target>
+
+	<!-- ==== Creates an easily-deployable WAR file from the build ==== -->
+
+	<target name="build-war" depends="compile-jsps" description="Create a WAR file from the current build.">
+		<jar destfile="${app.name}.war" basedir="${build.home}" />
+	</target>
+
+	<target name="install"  description="Create a WAR file and deploy">
+		<antcall target="clean" />
+		<antcall target="build-war" />
+		<antcall target="undeploy" />
+		<antcall target="deploy" />
+	</target>
+
+	<target name="undeploy" description="Remove web application">
+		<undeploy url="${url}" username="${username}" password="${password}" path="/${app.name}" />
+	</target>
+
+	<target name="deploy" description="add web application">
+		<deploy url="${url}" username="${username}" password="${password}"
+            path="/${app.name}" war="${app.name}.war"/>
+	</target>
+	
+	<target name="reload" description="Reload web application">
+		<reload  url="${url}" username="${username}" password="${password}" path="/${app.name}"/>
+  	</target>
+	
+	<target name="stop" description="Stop web application">
+		<stop  url="${url}" username="${username}" password="${password}" path="/${app.name}"/>
+  	</target>
+	
+	<target name="start" description="Start web application">
+		<start  url="${url}" username="${username}" password="${password}" path="/${app.name}"/>
+  	</target>
+
+	<!-- ==== Deploys the WARs ==== -->
+	
+</project>

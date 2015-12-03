@@ -1,0 +1,25 @@
+Error Report from %%service.name%%
+=============================
+
+Exception:
+
+Date:          %%date%%
+Server:        %%server_url=<null>%%
+Servlet:       %%servlet%%
+Request URL:   %%request_url=<Unknown>%%
+Stack Trace:
+  %%exception_stack_trace%%
+User Info:
+  PersonID:    %%person_id=<Unknown>%%
+  Person:      %%person=<Unknown>%%
+  Email:       %%person.email=<Unknown>%%
+  IP Address:  %%ip_address=<Unknown>%%
+  Headers:
+%%headers=    <none>%%
+  Parameters:
+%%parameters= <none>%%
+
+%%begin{additional_info_region}%%Additional Info:
+%%additional_info%%
+%%end{additional_info_region}%%Submitted by:  %%sender%%
+

@@ -1,0 +1,4 @@
+<%-- Copyright - The University of Edinburgh 2015 --%>
+<div class='text'>
+    <a href="<%=response.encodeURL(web_path+"/main.jsp") %>"><b>&lt;&lt; Back to the Main Page</b></a>
+</div>
